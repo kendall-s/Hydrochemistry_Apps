@@ -81,12 +81,12 @@ class NC_check_main(QMainWindow):
         intro_label = QLabel('<b>Load in a .csv and the folder containing the .nc files</b>')
 
         csv_label = QLabel('Location of .csv file')
-        self.csv_path = QLineEdit('C:/Users/she384/Documents/Data Corrections/15v03/processed/in2015_v03Hydro.csv')
+        self.csv_path = QLineEdit('')
         self.browse_csv = QPushButton('Browse')
         self.browse_csv.clicked.connect(self.browsecsv)
 
         nc_label = QLabel('Location of NC folder')
-        self.nc_path = QLineEdit('C:/Users/she384/Documents/Data Corrections/15v03/processed/')
+        self.nc_path = QLineEdit('')
         self.browse_nc = QPushButton('Browse')
         self.browse_nc.clicked.connect(self.browsenc)
 
@@ -285,22 +285,23 @@ class NC_check_main(QMainWindow):
 
                 write_string = ['' for x in header_row]
 
-                for i, x in enumerate(temp):
+                for i, row in enumerate(temp):
                     if i > 0:
-                        if x[0] == temp[i - 1][0] and x[1] == temp[i - 1][1]:
-                            write_string[int(3 * (x[5]) + 2)] = x[2]
-                            write_string[int(1 + (3 * (x[5])) + 2)] = x[3]
-                            write_string[int(2 + (3 * (x[5])) + 2)] = x[4]
+                        # Uses index 5 of row to get the column number
+                        if row[0] == temp[i - 1][0] and row[1] == temp[i - 1][1]:
+                            write_string[int(3 * (row[5]) + 2)] = row[2]
+                            write_string[int(1 + (3 * (row[5])) + 2)] = row[3]
+                            write_string[int(2 + (3 * (row[5])) + 2)] = row[4]
                         else:
-                            write_string[0] = x[0]
-                            write_string[1] = x[1]
-                            write_string[int(3 * (x[5]) + 2)] = x[2]
-                            write_string[int(1 + (3 * (x[5])) + 2)] = x[3]
-                            write_string[int(2 + (3 * (x[5])) + 2)] = x[4]
+                            write_string[0] = row[0]
+                            write_string[1] = row[1]
+                            write_string[int(3 * (row[5]) + 2)] = row[2] 
+                            write_string[int(1 + (3 * (row[5])) + 2)] = row[3]
+                            write_string[int(2 + (3 * (row[5])) + 2)] = row[4]
                             write.writerow(write_string)
-                            write_string = ['' for x in header_row]
+                            write_string = ['' for row in header_row]
                     try:
-                        if x[0] != temp[i+1][0]:
+                        if row[0] != temp[i+1][0]:
 
                             write.writerow([''])
                     except IndexError:
@@ -354,8 +355,7 @@ class NC_check_main(QMainWindow):
                                 try:
                                     resolution_index = header_count / 2
                                     # Extract the correct NC variable to match and then make sure it is sorted correctly
-                                    curr_nc_variable = matched_nc.variables[nc_entered_names[header_count]][0, 0, :, 0][
-                                                       :]
+                                    curr_nc_variable = matched_nc.variables[nc_entered_names[header_count]][0, 0, :, 0][:]
                                     curr_nc_variable = [x for _, x in sorted(zip(ros_pos, curr_nc_variable))]
 
                                     for value_index, nc_value in enumerate(curr_nc_variable):
