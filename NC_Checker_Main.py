@@ -334,6 +334,13 @@ class NC_check_main(QMainWindow):
 
                 # Read csv file in
                 csv_file = pd.read_csv(csv_path, skiprows=1)
+                
+                # Check if headers present as first or second row changes depending on HyPro version
+                try:
+                    test = csv_file.loc[csv_file['Deployment'] == 1]
+                except KeyError:
+                    csv_file = pd.read_csv(csv_path)
+
                 nc_files = os.listdir(nc_path)
 
                 # Loop through the different deployments and then subset the dataframe
