@@ -16,6 +16,8 @@ Takes in a folder that contains .slk files from a Seal auto analyser. Can plot t
 ## Iodate Normality
 Calculates Iodate standard normality very accurately. Takes into account environmental conditions and corrects for glassware expansion and atmosphere buoyancy. 
 
-
 ## NC to CSV Checker
 Checks for differences between the .csv and .nc files that HyPro exports. 
+
+## Time Stamp Generator
+Sometimes when running long nutrient analyses, such with underway AA100 analysis, AACE will not produce time stamps in the file. This GUI allows for the generation of these stamps to be pasted into the SLK file.
