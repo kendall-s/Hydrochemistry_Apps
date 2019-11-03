@@ -1,15 +1,25 @@
-from PyQt5.QtWidgets import (QMainWindow, QWidget, QGridLayout, QDesktopWidget, QLabel, QPushButton, QLineEdit, QFrame)
+from PyQt5.QtWidgets import (QMainWindow, QWidget, QGridLayout, QApplication, QLabel, QPushButton, QLineEdit, QFrame,
+                             QComboBox)
 from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import Qt
 import traceback
 from decimal import Decimal
 
-# To calculate the normality of iodate solution made up
+# To calculate the normality of analyte solutions made up
+# Makes use of the decimal package to better handle the accuracy of calculations
+# 04/11/2019 added in functionality to calculate a corrected normality for the other standard analytes,
+# re-adjusted the script to function in this way, renamed and generalised methods
+# Keeping it named IO3Norm for now, until can be bothered changing it
 
 AIR_DENSITY = 0.0012 # g/cm3 - General density of air
 CALIBRATED_WEIGHT_DENSITY = 8.36  # g/cm3 - Density of weights to calibrate balance
 POTASSIUM_IODATE_DENSITY = 3.89  # g/cm3 - Denstiy of Iodate salt
-IODATE_EQUIVALENT_WEIGHT = 35.667  # g - Equiv weight in mederately acidic solution
+IODATE_EQUIVALENT_WEIGHT = 35.667  # g - Equivalent weight in mederately acidic solution
+
+DENSITY_TABLE = {'Iodate': 3.89, 'Silicate': 2.70, 'Phosphate': 2.34, 'Nitrate': 2.109,
+                 'Nitrite': 2.168, 'Ammonia': 1.77}
+MOLECULAR_WEIGHTS = {'Iodate': 35.667, 'Silicate': 188.06, 'Phosphate': 136.09, 'Nitrate': 101.10,
+                     'Nitrite': 68.99, 'Ammonia': 132.13}
 
 class IodateNorm(QMainWindow):
 
@@ -32,7 +42,6 @@ class IodateNorm(QMainWindow):
                     font: 14px;
                 }
                 QListWidget {
-
                     font: 14px;
                 }
                 QTableWidget {
@@ -53,17 +62,23 @@ class IodateNorm(QMainWindow):
         grid_layout.setSpacing(10)
 
         self.setGeometry(0, 0, 450, 350)
-        qtRect = self.frameGeometry()
-        centrePoint = QDesktopWidget().availableGeometry().center()
-        qtRect.moveCenter(centrePoint)
-        self.move(qtRect.topLeft())
+        qtRectangle = self.frameGeometry()
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
+        qtRectangle.moveCenter(centerPoint)
+        self.move(qtRectangle.topLeft())
 
-        self.setWindowTitle('Calculate Iodate Normality')
+        self.setWindowTitle('Calculate Normality')
+
+        analyte_label = QLabel('Calculate for which analyte? ')
+        self.analyte_combo = QComboBox()
+        self.analyte_combo.addItems(DENSITY_TABLE.keys())
+        self.analyte_combo.currentTextChanged.connect(self.update_text)
 
         flask_vol_label = QLabel('Volume of volumetric flask at 20°C (mL):')
         self.flask_vol = QLineEdit(self)
 
-        iodate_weight_label = QLabel('Weight of KIO3 standard (g):')
+        iodate_weight_label = QLabel('Weight of standard (g):')
         self.iodate_weight = QLineEdit(self)
 
         temperature_label = QLabel('Temperature of solution when prepared (°C):')
@@ -85,52 +100,54 @@ class IodateNorm(QMainWindow):
         self.corrected_water_vol = QLineEdit(self)
         self.corrected_water_vol.setReadOnly(True)
 
-        true_mass_label = QLabel('True Iodate mass (g):')
+        self.true_mass_label = QLabel('True %s mass (g):' % self.analyte_combo.currentText())
         self.true_mass = QLineEdit(self)
         self.true_mass.setReadOnly(True)
 
-        equiv_iodate_label = QLabel('Equivalent Iodate (g):')
-        self.equiv_iodate_line = QLineEdit(self)
-        self.equiv_iodate_line.setReadOnly(True)
+        self.equiv_weight_label = QLabel('Equivalent %s (mol):' % self.analyte_combo.currentText())
+        self.equiv_weight_line = QLineEdit(self)
+        self.equiv_weight_line.setReadOnly(True)
 
         linesep2 = QFrame()
         linesep2.setFrameShape(QFrame.HLine)
         linesep2.setFrameShadow(QFrame.Sunken)
 
-        calc_normality_label = QLabel('Standard normality at 20°C (N):')
+        calc_normality_label = QLabel('Standard Normality at 20°C (N):')
         self.calc_normality = QLineEdit(self)
         self.calc_normality.setReadOnly(True)
 
+        grid_layout.addWidget(analyte_label, 0, 0)
+        grid_layout.addWidget(self.analyte_combo, 0, 1)
 
-        grid_layout.addWidget(flask_vol_label, 0, 0)
-        grid_layout.addWidget(self.flask_vol, 0, 1)
+        grid_layout.addWidget(flask_vol_label, 1, 0)
+        grid_layout.addWidget(self.flask_vol, 1, 1)
 
-        grid_layout.addWidget(iodate_weight_label, 1, 0)
-        grid_layout.addWidget(self.iodate_weight, 1, 1)
+        grid_layout.addWidget(iodate_weight_label, 2, 0)
+        grid_layout.addWidget(self.iodate_weight, 2, 1)
 
-        grid_layout.addWidget(temperature_label, 2, 0)
-        grid_layout.addWidget(self.temperature, 2, 1)
+        grid_layout.addWidget(temperature_label, 3, 0)
+        grid_layout.addWidget(self.temperature, 3, 1)
 
-        grid_layout.addWidget(calculate, 3, 0, 1, 2, Qt.AlignHCenter)
+        grid_layout.addWidget(calculate, 4, 0, 1, 2, Qt.AlignHCenter)
 
-        grid_layout.addWidget(linesep1, 4, 0, 1, 2)
+        grid_layout.addWidget(linesep1, 5, 0, 1, 2)
 
-        grid_layout.addWidget(self.corrected_flask_vol_label, 5, 0)
-        grid_layout.addWidget(self.corrected_flask_vol, 5, 1)
+        grid_layout.addWidget(self.corrected_flask_vol_label, 6, 0)
+        grid_layout.addWidget(self.corrected_flask_vol, 6, 1)
 
-        grid_layout.addWidget(corrected_water_vol_label, 6, 0)
-        grid_layout.addWidget(self.corrected_water_vol, 6, 1)
+        grid_layout.addWidget(corrected_water_vol_label, 7, 0)
+        grid_layout.addWidget(self.corrected_water_vol, 7, 1)
 
-        grid_layout.addWidget(true_mass_label, 7, 0)
-        grid_layout.addWidget(self.true_mass, 7, 1)
+        grid_layout.addWidget(self.true_mass_label, 8, 0)
+        grid_layout.addWidget(self.true_mass, 8, 1)
 
-        grid_layout.addWidget(equiv_iodate_label, 8, 0)
-        grid_layout.addWidget(self.equiv_iodate_line, 8, 1)
+        grid_layout.addWidget(self.equiv_weight_label, 9, 0)
+        grid_layout.addWidget(self.equiv_weight_line, 9, 1)
 
-        grid_layout.addWidget(linesep2, 9, 0, 1, 2)
+        grid_layout.addWidget(linesep2, 10, 0, 1, 2)
 
-        grid_layout.addWidget(calc_normality_label, 10, 0)
-        grid_layout.addWidget(self.calc_normality, 10, 1)
+        grid_layout.addWidget(calc_normality_label, 11, 0)
+        grid_layout.addWidget(self.calc_normality, 11, 1)
 
         self.centralWidget().setLayout(grid_layout)
 
@@ -149,13 +166,13 @@ class IodateNorm(QMainWindow):
             water_vol = self.water_dvdt(glass_vol, temp, 20)
             self.corrected_water_vol.setText(str(round(water_vol, 3)))
 
-            iodate_tw = self.true_weight(meas_weight)
-            self.true_mass.setText(str(round(iodate_tw, 6)))
+            calc_tw = self.true_weight(meas_weight)
+            self.true_mass.setText(str(round(calc_tw, 6)))
 
-            iodate_equiv = self.iodate_equivalent(iodate_tw)
-            self.equiv_iodate_line.setText(str(round(iodate_equiv, 5)))
+            calc_equiv_weight = self.equivalent_weight(calc_tw)
+            self.equiv_weight_line.setText(str(round(calc_equiv_weight, 5)))
 
-            iodate_normality = self.normality(iodate_equiv, water_vol)
+            iodate_normality = self.normality(calc_equiv_weight, water_vol)
             self.calc_normality.setText(str(round(float(iodate_normality), 7)))
 
         except ValueError:
@@ -167,24 +184,36 @@ class IodateNorm(QMainWindow):
     def normality(self, equivalent, water_vol):
 
         normality = equivalent / (Decimal(water_vol) / Decimal(1000))
+
         return normality
 
-    def iodate_equivalent(self, weight):
+    def equivalent_weight(self, weight):
         # Calculated assuming potassium iodate is in moderately acidic solution
         # meaning molarity to normal conversion is 6 to 1, equivalent weight therefore
         # 214.00 divided by 6 to equal 35.667 - this was rounded but to match
-        # legacy dos software it was expanded to that exact number
-        dec_weight = Decimal(weight)
-        equiv_coef = Decimal(214.00/6.00)
-        dec_eq = dec_weight / equiv_coef
+        # legacy DOS software it was expanded to that exact number
 
-        eq = weight / (214 / 6)
+        dec_weight = Decimal(weight)
+
+        if self.analyte_combo.currentText() == 'Iodate':
+            equivalent_molecular_weight = Decimal(214.00/6.00)
+            dec_eq = dec_weight / equivalent_molecular_weight
+
+        elif self.analyte_combo.currentText() == 'Ammonia':
+            # There is two parts Ammonia in the compound so double
+            equiv_weight = dec_weight * 2
+            dec_eq = equiv_weight / Decimal(MOLECULAR_WEIGHTS['Ammonia'])
+        else:
+            dec_eq = dec_weight / Decimal(MOLECULAR_WEIGHTS[self.analyte_combo.currentText()])
 
         return dec_eq
 
     def true_weight(self, meas_weight):
         # Calculated from Single pan balances, buoyancy and gravity, R. Battino 1984.
-        tw = meas_weight * (1 + ((1/POTASSIUM_IODATE_DENSITY) - (1/CALIBRATED_WEIGHT_DENSITY)) * AIR_DENSITY)
+        analyte = self.analyte_combo.currentText()
+        analyte_density = DENSITY_TABLE[analyte]
+
+        tw = meas_weight * (1 + ((1/analyte_density) - (1/CALIBRATED_WEIGHT_DENSITY)) * AIR_DENSITY)
 
         return tw
 
@@ -232,3 +261,7 @@ class IodateNorm(QMainWindow):
         final_volume = volume * (1 + glass_coefficient * (temperature_desired - temperature_known))
 
         return final_volume
+
+    def update_text(self):
+        self.true_mass_label.setText('True %s mass (g):' % self.analyte_combo.currentText())
+        self.equiv_weight_label.setText('Equivalent %s (mol):' % self.analyte_combo.currentText())
