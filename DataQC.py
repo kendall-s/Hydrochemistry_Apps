@@ -1,12 +1,9 @@
 import sys, os, traceback, pprint
-import numpy.random.common
-import numpy.random.bounded_integers
-import numpy.random.entropy
 import fix_qt_import_error
 import pandas as pd
 from netCDF4 import Dataset
 from time import sleep
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QGridLayout, QDesktopWidget, QLabel, QPushButton,
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QGridLayout, QLabel, QPushButton,
                              QFrame, QLineEdit, QFileDialog, QComboBox, QListWidget, QAbstractItemView, QTableWidget,
                              QCheckBox, QHeaderView, QTableWidgetItem)
 from PyQt5.QtGui import QIcon, QFont
@@ -72,10 +69,11 @@ class Dataqc(QMainWindow):
         grid_layout.setSpacing(10)
 
         self.setGeometry(0, 0, 1350, 750)
-        qtRect = self.frameGeometry()
-        centrePoint = QDesktopWidget().availableGeometry().center()
-        qtRect.moveCenter(centrePoint)
-        self.move(qtRect.topLeft())
+        qtRectangle = self.frameGeometry()
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
+        qtRectangle.moveCenter(centerPoint)
+        self.move(qtRectangle.topLeft())
 
         self.setWindowTitle('Hydro Data QuickQCer')
 

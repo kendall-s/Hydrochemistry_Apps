@@ -15,7 +15,7 @@ class qcReaderMain(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.title = 'QC Chopper'
+        self.title = 'QC Table Stat Maker'
 
         self.setWindowIcon(QtGui.QIcon(':/assets/2dropsshadow.svg'))
 
@@ -44,11 +44,9 @@ class qcReaderMain(QMainWindow):
             QLabel {
                 font: 13px;
             }
-
             QListWidget {
                 font: 13px;
             }
-
             QPushButton {
                 font: 14px;
             }
@@ -67,10 +65,10 @@ class qcReaderMain(QMainWindow):
         self.setFont(deffont)
         self.setGeometry(self.left, self.top, self.width, self.height)
         qtRectangle = self.frameGeometry()
-        centerPoint = QDesktopWidget().availableGeometry().center()
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
         qtRectangle.moveCenter(centerPoint)
         self.move(qtRectangle.topLeft())
-        # self.setFixedSize(self.size())
 
         self.setWindowTitle(self.title)
 

@@ -1,7 +1,7 @@
 import sys
 from time import sleep
 import fix_qt_import_error
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QGridLayout, QDesktopWidget, QLabel, QPushButton,
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QWidget, QGridLayout, QLabel, QPushButton,
                              QFrame, QHBoxLayout)
 from PyQt5.QtGui import QIcon, QFont, QPixmap
 from PyQt5.QtCore import Qt
@@ -10,6 +10,7 @@ import QCReader
 import DataQC
 import NutrientStatPlotter
 import IO3Norm
+import Time_Stamp_Generator
 import NC_Checker_Main
 
 import hyproicons
@@ -95,10 +96,11 @@ class KenWareMain(QMainWindow):
         grid_layout.setContentsMargins(0, 0, 0, 0)
 
         self.setGeometry(0, 0, 400, 450)
-        qtRect = self.frameGeometry()
-        centrePoint = QDesktopWidget().availableGeometry().center()
-        qtRect.moveCenter(centrePoint)
-        self.move(qtRect.topLeft())
+        qtRectangle = self.frameGeometry()
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
+        qtRectangle.moveCenter(centerPoint)
+        self.move(qtRectangle.topLeft())
 
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
@@ -151,13 +153,17 @@ class KenWareMain(QMainWindow):
         baseline_launch = QPushButton('Launch BO Plotter')
         baseline_launch.clicked.connect(self.open_boplot)
 
-        iodate_label = QLabel('Iodate Normality')
-        iodate_launch = QPushButton('Launch IO3 Norm')
+        iodate_label = QLabel('Analyte Normality')
+        iodate_launch = QPushButton('Launch Analyte Norm')
         iodate_launch.clicked.connect(self.open_ionorm)
 
         nccheck_label = QLabel('NC Checker')
         nccheck_launch = QPushButton('Launch NC Checker')
         nccheck_launch.clicked.connect(self.open_nccheck)
+
+        time_stamp_label = QLabel('SLK Time Stamps')
+        time_stamp_launch = QPushButton('Launch Stamp Gen')
+        time_stamp_launch.clicked.connect(self.open_time_gen)
 
         linesep3 = QFrame()
         linesep3.setFrameShape(QFrame.HLine)
@@ -175,6 +181,10 @@ class KenWareMain(QMainWindow):
         linesep6.setFrameShape(QFrame.HLine)
         linesep6.setFrameShadow(QFrame.Sunken)
 
+        linesep7 = QFrame()
+        linesep7.setFrameShape(QFrame.HLine)
+        linesep7.setFrameShadow(QFrame.Sunken)
+
         window_surround = QFrame()
         window_surround.setProperty('bg', True)
 
@@ -182,29 +192,32 @@ class KenWareMain(QMainWindow):
         close.clicked.connect(self.close_app)
         close.setFixedWidth(125)
 
-        grid_layout.addWidget(window_surround, 0, 0, 16, 4)
-        grid_layout.addWidget(header_frame, 1, 1, 2, 2)
-        grid_layout.addWidget(header_logo, 1, 1, 2, 1, Qt.AlignHCenter)
-        grid_layout.addWidget(header_label, 1, 1, 2, 2, Qt.AlignHCenter)
+        grid_layout.addWidget(window_surround, 0, 0, 19, 4)
+        grid_layout.addWidget(header_frame, 1, 1, 3, 2)
+        grid_layout.addWidget(header_logo, 1, 1, 3, 1, Qt.AlignHCenter)
+        grid_layout.addWidget(header_label, 1, 1, 3, 2, Qt.AlignHCenter)
         #grid_layout.addWidget(body_frame, 1, 0, 5, 2)
-        grid_layout.addWidget(docalc_label, 3, 1)
-        grid_layout.addWidget(docalc_launch, 3, 2)
-        grid_layout.addWidget(linesep1, 4, 1, 1, 2)
-        grid_layout.addWidget(qctable_label, 5, 1)
-        grid_layout.addWidget(qctable_launch, 5, 2)
-        grid_layout.addWidget(linesep2, 6, 1, 1, 2)
-        grid_layout.addWidget(dataqc_label, 7, 1)
-        grid_layout.addWidget(dataqc_launch, 7, 2)
-        grid_layout.addWidget(linesep3, 8, 1, 1, 2)
-        grid_layout.addWidget(baseline_label, 9, 1)
-        grid_layout.addWidget(baseline_launch, 9, 2)
-        grid_layout.addWidget(linesep4, 10, 1, 1, 2)
-        grid_layout.addWidget(iodate_label, 11, 1)
-        grid_layout.addWidget(iodate_launch, 11, 2)
-        grid_layout.addWidget(linesep5, 12, 1, 1, 2)
-        grid_layout.addWidget(nccheck_label, 13, 1)
-        grid_layout.addWidget(nccheck_launch, 13, 2)
-        grid_layout.addWidget(linesep6, 14, 1, 1, 2)
+        grid_layout.addWidget(docalc_label, 4, 1)
+        grid_layout.addWidget(docalc_launch, 4, 2)
+        grid_layout.addWidget(linesep1, 5, 1, 1, 2)
+        grid_layout.addWidget(qctable_label, 6, 1)
+        grid_layout.addWidget(qctable_launch, 6, 2)
+        grid_layout.addWidget(linesep2, 7, 1, 1, 2)
+        grid_layout.addWidget(dataqc_label, 8, 1)
+        grid_layout.addWidget(dataqc_launch, 8, 2)
+        grid_layout.addWidget(linesep3, 9, 1, 1, 2)
+        grid_layout.addWidget(baseline_label, 10, 1)
+        grid_layout.addWidget(baseline_launch, 10, 2)
+        grid_layout.addWidget(linesep4, 11, 1, 1, 2)
+        grid_layout.addWidget(iodate_label, 12, 1)
+        grid_layout.addWidget(iodate_launch, 12, 2)
+        grid_layout.addWidget(linesep5, 13, 1, 1, 2)
+        grid_layout.addWidget(nccheck_label, 14, 1)
+        grid_layout.addWidget(nccheck_launch, 14, 2)
+        grid_layout.addWidget(linesep6, 15, 1, 1, 2)
+        grid_layout.addWidget(time_stamp_label, 16, 1)
+        grid_layout.addWidget(time_stamp_launch, 16, 2)
+        grid_layout.addWidget(linesep7, 17, 1, 1, 2)
         #grid_layout.addWidget(close, 15, 1, 1, 2, Qt.AlignHCenter)
 
         dialog_buttons_layout = QHBoxLayout()
@@ -242,6 +255,10 @@ class KenWareMain(QMainWindow):
 
     def open_nccheck(self):
         self.nc_check = NC_Checker_Main.NC_check_main()
+        sleep(0.3)
+
+    def open_time_gen(self):
+        self.time_gen = Time_Stamp_Generator.TimeStamps()
         sleep(0.3)
 
     def close_app(self):

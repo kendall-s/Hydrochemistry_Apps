@@ -45,10 +45,10 @@ class Mainmenu(QMainWindow):
 
         self.setGeometry(0, 0, 320, 400)
         qtRectangle = self.frameGeometry()
-        centerPoint = QDesktopWidget().availableGeometry().center()
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
         qtRectangle.moveCenter(centerPoint)
         self.move(qtRectangle.topLeft())
-        self.setFixedSize(self.size())
 
         self.setWindowTitle(self.title)
 
