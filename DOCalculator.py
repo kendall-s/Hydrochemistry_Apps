@@ -1,8 +1,9 @@
 import sys, os
 import fix_qt_import_error
-from PyQt5.QtWidgets import (QApplication, QWidget, QMainWindow, QPushButton, QLabel, QGridLayout, QDesktopWidget, QFileDialog,
-                             QLineEdit, QListWidget)
+from PyQt5.QtWidgets import (QApplication, QWidget, QMainWindow, QPushButton, QLabel, QGridLayout, QListWidgetItem,
+                             QFileDialog, QLineEdit, QListWidget)
 from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtCore import Qt
 import CorrectingDOs
 import traceback
 import hyproicons
@@ -28,7 +29,7 @@ class Mainmenu(QMainWindow):
                 font: 13px;
             }
             QListWidget {
-                font: 13px;
+                font: 14px;
             }
             QPushButton {
                 font: 13px;
@@ -43,7 +44,7 @@ class Mainmenu(QMainWindow):
 
         deffont = QFont('Segoe UI')
 
-        self.setGeometry(0, 0, 320, 400)
+        self.setGeometry(0, 0, 270, 490)
         qtRectangle = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
         centerPoint = QApplication.desktop().screenGeometry(screen).center()
@@ -76,10 +77,10 @@ class Mainmenu(QMainWindow):
         self.directext.setFont(deffont)
 
         gridlayout.addWidget(headinglabel, 0, 0, 1, 2)
-        gridlayout.addWidget(browsebutton, 1, 1)
-        gridlayout.addWidget(self.directext, 1, 0)
-        gridlayout.addWidget(self.fileslist, 2, 0, 1, 2)
-        gridlayout.addWidget(self.loadbutton, 3, 1)
+        gridlayout.addWidget(browsebutton, 2, 1)
+        gridlayout.addWidget(self.directext, 1, 0, 1, 2)
+        gridlayout.addWidget(self.fileslist, 3, 0, 1, 2)
+        gridlayout.addWidget(self.loadbutton, 4, 0, 1, 2)
 
         self.centralWidget().setLayout(gridlayout)
 
@@ -96,6 +97,7 @@ class Mainmenu(QMainWindow):
             lstfiles = []
             for file in [f for f in os.listdir(files) if f.endswith('.LST')]:
                 lstfiles.append(file)
+
             self.fileslist.addItems(lstfiles)
             self.browsed = True
             self.loadbutton.setText('Load file')

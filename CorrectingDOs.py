@@ -1,7 +1,7 @@
 import sys, csv
 import fix_qt_import_error
-from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QLabel, QGridLayout, QDesktopWidget,
-                             QLineEdit, QTableWidget, QMessageBox, QTableWidgetItem, QHeaderView)
+from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QLabel, QGridLayout,
+                             QLineEdit, QTableWidget, QMessageBox, QTableWidgetItem, QHeaderView, QCheckBox)
 from PyQt5.QtGui import QIcon, QFont
 import hyproicons
 import traceback
@@ -43,15 +43,20 @@ class correctDos(QWidget):
             QTableWidget {
                 font: 13px;
             }
-                            """)
+            QCheckBox {
+                font: 13px;
+            }
+                           """)
 
     def initUI(self):
 
         deffont = QFont('Segoe UI')
+        self.setFont(deffont)
 
-        self.setGeometry(300, 350, 981, 540)
+        self.setGeometry(0, 0, 995, 580)
         qtRectangle = self.frameGeometry()
-        centerPoint = QDesktopWidget().availableGeometry().center()
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
         qtRectangle.moveCenter(centerPoint)
         self.move(qtRectangle.topLeft())
         self.setFixedSize(self.size())
@@ -69,7 +74,7 @@ class correctDos(QWidget):
         self.o2mol = []
         try:
             for i in range(len(self.oxygenmils)):
-                self.o2mol.append(round(float((self.oxygenmils[i])) * 44.61, 5))
+                self.o2mol.append(round(float((self.oxygenmils[i])) * 44.661, 5))
         except Exception as e:
             print(e)
 
@@ -83,6 +88,7 @@ class correctDos(QWidget):
         self.datatable.setRowCount(len(self.stationnum))
         self.datatable.setColumnCount(13)
         self.datatable.setHorizontalHeaderLabels(headerlabels)
+        self.datatable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         header = self.datatable.horizontalHeader()
 
         for i in range(13):
@@ -150,6 +156,8 @@ class correctDos(QWidget):
         self.thionormtext.setFixedWidth(150)
         self.thionormtext.setReadOnly(True)
 
+        self.override_thio_norm_check = QCheckBox('Override Thio N Calc?', self)
+
         thiotemplabel = QLabel('Thio Temperature')
         thiotemplabel.setFont(deffont)
 
@@ -209,22 +217,23 @@ class correctDos(QWidget):
         gridlayout.addWidget(self.iodateburettetext, 7, 0)
         gridlayout.addWidget(thionormlabel, 8, 0)
         gridlayout.addWidget(self.thionormtext, 9, 0)
-        gridlayout.addWidget(thiotemplabel, 10, 0)
-        gridlayout.addWidget(self.thiotemptext, 11, 0)
-        gridlayout.addWidget(titerlabel, 12, 0)
-        gridlayout.addWidget(self.titertext, 13, 0)
-        gridlayout.addWidget(blanklabel, 14, 0)
-        gridlayout.addWidget(self.blanktext, 15, 0)
+        gridlayout.addWidget(self.override_thio_norm_check, 10, 0)
+        gridlayout.addWidget(thiotemplabel, 11, 0)
+        gridlayout.addWidget(self.thiotemptext, 12, 0)
+        gridlayout.addWidget(titerlabel, 13, 0)
+        gridlayout.addWidget(self.titertext, 14, 0)
+        gridlayout.addWidget(blanklabel, 15, 0)
+        gridlayout.addWidget(self.blanktext, 16, 0)
 
-        gridlayout.addWidget(self.editfields, 16, 0)
+        gridlayout.addWidget(self.editfields, 17, 0)
 
         gridlayout.addWidget(resultslabel, 1, 1, 1, 2)
-        gridlayout.addWidget(self.datatable, 2, 1, 14, 3)
+        gridlayout.addWidget(self.datatable, 2, 1, 15, 3)
 
-        gridlayout.addWidget(self.save, 16, 3)
-        gridlayout.addWidget(self.savecsv, 16, 2)
+        gridlayout.addWidget(self.save, 17, 3)
+        gridlayout.addWidget(self.savecsv, 17, 2)
 
-        gridlayout.addWidget(reproc, 16, 1)
+        gridlayout.addWidget(reproc, 17, 1)
         self.setLayout(gridlayout)
 
         self.show()
@@ -395,8 +404,11 @@ class correctDos(QWidget):
         return oxycalc
 
     def corrthionorm(self, iodatevol, iodatenorm, blank, stdtiter):
+        if self.override_thio_norm_check.isChecked():
+            thio20N = float(self.thionormtext.text())
+        else:
+            thio20N = (float(iodatevol) * float(iodatenorm)) / (float(stdtiter) - float(blank))
 
-        thio20N = (float(iodatevol) * float(iodatenorm)) / (float(stdtiter) - float(blank))
         return thio20N
 
     def completeproc(self, file):
