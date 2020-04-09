@@ -334,7 +334,7 @@ class NC_check_main(QMainWindow):
 
                 # Read csv file in
                 csv_file = pd.read_csv(csv_path, skiprows=1)
-                
+
                 # Check if headers present as first or second row changes depending on HyPro version
                 try:
                     test = csv_file.loc[csv_file['Deployment'] == 1]
@@ -346,7 +346,7 @@ class NC_check_main(QMainWindow):
                 # Loop through the different deployments and then subset the dataframe
                 for dep in set(csv_file['Deployment']):
                     csv_subset = csv_file[csv_file['Deployment'] == dep]
-
+                    csv_subset = csv_subset.sort_values(by='RP')
                     # Loop through all files in the folder provided and then open the NC that matches the deployment
                     # The matched nc file is opened and the rosette positions are extracted to sort the data by
                     # as data in the NC file is not always sorted 1-24 RP...

@@ -86,8 +86,6 @@ class KenWareMain(QMainWindow):
             }
                             """)
 
-
-
     def init_ui(self):
         self.setFont(QFont('Segoe UI'))
 
@@ -105,6 +103,7 @@ class KenWareMain(QMainWindow):
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowTitle('Hydro Apps')
+        self.showNormal()
 
         x_close = QPushButton('x')
         x_close.setProperty('close', True)
@@ -117,7 +116,6 @@ class KenWareMain(QMainWindow):
         __min.setFont(QFont('Verdana'))
         __min.clicked.connect(self.min_app)
         __min.setToolTip('Minimise')
-
 
         header_logo = QLabel()
         header_logo.setPixmap(QPixmap(':/assets/2dropsshadow.ico').scaled(32, 32, Qt.KeepAspectRatio))

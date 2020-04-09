@@ -9,10 +9,15 @@ import traceback
 
 class correctDos(QWidget):
 
+
     def __init__(self, file):
         super().__init__()
         self.setWindowIcon(QIcon(':/assets/2dropsshadow.svg'))
+
+        self.ml_to_mol_coefficient = 44.661
+
         self.lstfile = file
+
         self.initUI()
 
         self.setStyleSheet("""
@@ -74,7 +79,7 @@ class correctDos(QWidget):
         self.o2mol = []
         try:
             for i in range(len(self.oxygenmils)):
-                self.o2mol.append(round(float((self.oxygenmils[i])) * 44.661, 5))
+                self.o2mol.append(round(float((self.oxygenmils[i])) * self.ml_to_mol_coefficient, 4))
         except Exception as e:
             print(e)
 
@@ -390,7 +395,7 @@ class correctDos(QWidget):
 
     def oxycalc(self, thio20n, titer20, blank, botvol):
         # Constants
-        o2mlpmeq = 5.598  # mL of O2 (STP) per milliequiv of O2 gas (5.5598mL)
+        o2mlpmeq = 5.598  # mL of O2 (STP) per milliequiv of O2 gas (5.598mL)
         doreag = 0.0017  # Dissolved O2 in reagents @ 25deg
         vreag = 2  # Volume of reagents used (2.0mL)
 
@@ -420,7 +425,10 @@ class correctDos(QWidget):
         titer, oxygenmils, thiotemps, drawtemp, volts, titertime = self.readinlst(lst)
 
         # Find the actual volume of iodate dispensed
-        correctediodatetiter = self.h2odvdt1(self.iodateburettetext.text(), 20, self.iodatetemptext.text())
+        #correctediodatetiter = self.h2odvdt1(self.iodateburettetext.text(), 20, self.iodatetemptext.text())
+        #self.iodateburettetext.setText(str(round(correctediodatetiter, 5)))
+
+        correctediodatetiter = float(self.iodateburettetext.text())
 
         # Determine the Thio normality
         actualthion = self.corrthionorm(correctediodatetiter, self.iodatenormtext.text(), self.blanktext.text(),
@@ -433,15 +441,13 @@ class correctDos(QWidget):
         oxygenresults = []
         self.o2mol = []
         corr_flaskvol = []
-        print(flaskvol)
         for i, x in enumerate(flaskvol):
             corr_flaskvol.append(round(self.glassdvdt(x, 20, drawtemp[i]), 3))
-        print(corr_flaskvol)
 
         for i in range(len(stationnum)):
             oxygenresults.append(
                 round(self.oxycalc(actualthion, titer[i], float(self.blanktext.text()), corr_flaskvol[i]), 5))
-            self.o2mol.append(round(float(oxygenresults[i]) * 44.61, 3))
+            self.o2mol.append(round(float(oxygenresults[i]) * self.ml_to_mol_coefficient, 4))
 
         for i in range(len(stationnum)):
             self.datatable.setItem(i, 0, QTableWidgetItem(str(stationnum[i])))
