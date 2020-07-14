@@ -12,6 +12,7 @@ import NutrientStatPlotter
 import IO3Norm
 import Time_Stamp_Generator
 import NC_Checker_Main
+import GlassCal
 
 import hyproicons
 
@@ -93,7 +94,7 @@ class KenWareMain(QMainWindow):
         grid_layout.setSpacing(10)
         grid_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.setGeometry(0, 0, 400, 450)
+        self.setGeometry(0, 0, 400, 500)
         qtRectangle = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
         centerPoint = QApplication.desktop().screenGeometry(screen).center()
@@ -155,6 +156,10 @@ class KenWareMain(QMainWindow):
         iodate_launch = QPushButton('Launch Analyte Norm')
         iodate_launch.clicked.connect(self.open_ionorm)
 
+        glasscal_label = QLabel('Glass Calibration')
+        glasscal_launch = QPushButton('Launch Glass Cal')
+        glasscal_launch.clicked.connect(self.open_glasscal)
+
         nccheck_label = QLabel('NC Checker')
         nccheck_launch = QPushButton('Launch NC Checker')
         nccheck_launch.clicked.connect(self.open_nccheck)
@@ -183,6 +188,10 @@ class KenWareMain(QMainWindow):
         linesep7.setFrameShape(QFrame.HLine)
         linesep7.setFrameShadow(QFrame.Sunken)
 
+        linesep8 = QFrame()
+        linesep8.setFrameShape(QFrame.HLine)
+        linesep8.setFrameShadow(QFrame.Sunken)
+
         window_surround = QFrame()
         window_surround.setProperty('bg', True)
 
@@ -190,7 +199,7 @@ class KenWareMain(QMainWindow):
         close.clicked.connect(self.close_app)
         close.setFixedWidth(125)
 
-        grid_layout.addWidget(window_surround, 0, 0, 19, 4)
+        grid_layout.addWidget(window_surround, 0, 0, 21, 4)
         grid_layout.addWidget(header_frame, 1, 1, 3, 2)
         grid_layout.addWidget(header_logo, 1, 1, 3, 1, Qt.AlignHCenter)
         grid_layout.addWidget(header_label, 1, 1, 3, 2, Qt.AlignHCenter)
@@ -210,12 +219,15 @@ class KenWareMain(QMainWindow):
         grid_layout.addWidget(iodate_label, 12, 1)
         grid_layout.addWidget(iodate_launch, 12, 2)
         grid_layout.addWidget(linesep5, 13, 1, 1, 2)
-        grid_layout.addWidget(nccheck_label, 14, 1)
-        grid_layout.addWidget(nccheck_launch, 14, 2)
+        grid_layout.addWidget(glasscal_label, 14, 1)
+        grid_layout.addWidget(glasscal_launch, 14, 2)
         grid_layout.addWidget(linesep6, 15, 1, 1, 2)
-        grid_layout.addWidget(time_stamp_label, 16, 1)
-        grid_layout.addWidget(time_stamp_launch, 16, 2)
+        grid_layout.addWidget(nccheck_label, 16, 1)
+        grid_layout.addWidget(nccheck_launch, 16, 2)
         grid_layout.addWidget(linesep7, 17, 1, 1, 2)
+        grid_layout.addWidget(time_stamp_label, 18, 1)
+        grid_layout.addWidget(time_stamp_launch, 18, 2)
+        grid_layout.addWidget(linesep8, 19, 1, 1, 2)
         #grid_layout.addWidget(close, 15, 1, 1, 2, Qt.AlignHCenter)
 
         dialog_buttons_layout = QHBoxLayout()
@@ -249,6 +261,10 @@ class KenWareMain(QMainWindow):
 
     def open_ionorm(self):
         self.io_norm = IO3Norm.IodateNorm()
+        sleep(0.3)
+
+    def open_glasscal(self):
+        self.g_cal = GlassCal.GlassCalMain()
         sleep(0.3)
 
     def open_nccheck(self):
