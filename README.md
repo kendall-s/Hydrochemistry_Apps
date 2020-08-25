@@ -1,3 +1,12 @@
+
+
+# Dead - repo not used. Started clean slate for the continuation of the Hydrochemistry apps so that a CI/CD workflow and better structured project could be implemented. 
+## [Please see this repo for the hydrochemistry apps](https://github.com/kendall-s/HydrochemistryApps) 
+
+
+
+
+
 # Hydrochemistry_Apps
 
 ## DO Calculator
